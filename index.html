@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -24,7 +23,7 @@
       --loss: #ef4444;
       --input-bg: #1e1e1e;
       --input-border: #333;
-      --row-hover: rgba(255, 255, 255, 0.03);
+      --row-hover: rgba(255,255,255,0.03);
       --standings-row-border: #1e1e1e;
       --tentative-bg: #1a1600;
       --tentative-border: #3a3000;
@@ -40,7 +39,7 @@
       --loss: #dc2626;
       --input-bg: #ebebeb;
       --input-border: #ccc;
-      --row-hover: rgba(0, 0, 0, 0.03);
+      --row-hover: rgba(0,0,0,0.03);
       --standings-row-border: #eee;
       --tentative-bg: #fffbeb;
       --tentative-border: #fcd34d;
@@ -60,7 +59,6 @@
       opacity: 0;
       animation: fadeIn 0.3s ease-in forwards;
     }
-
     @keyframes fadeIn { to { opacity: 1; } }
 
     /* ══ HEADER ══ */
@@ -74,14 +72,12 @@
       flex-shrink: 0;
       z-index: 10;
     }
-
     header h1 {
       font-family: 'Bebas Neue', sans-serif;
       font-size: 1.65rem;
       letter-spacing: 3px;
       color: var(--text);
     }
-
     .badge {
       border: 1px solid var(--border);
       border-radius: 3px;
@@ -92,7 +88,6 @@
       text-transform: uppercase;
       letter-spacing: 1px;
     }
-
     .theme-toggle {
       margin-left: auto;
       display: flex;
@@ -122,23 +117,53 @@
     }
     body.light .toggle-thumb { transform: translateX(17px); background: #111; }
 
-    /* ══ ROOT GRID: 2 fixture cols + full-width bottom ══ */
+    /* ══ ROOT GRID: 3 equal columns ══ */
     .root-grid {
       flex: 1;
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      grid-template-rows: auto 1fr auto;
+      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-rows: auto 1fr;
       overflow: hidden;
       min-height: 0;
     }
 
-    /* ── Cross-column clash row spans both cols ── */
+    /* ── Cross-column clash row spans cols 1-2 ── */
     .clash-row {
       grid-column: 1 / 3;
       grid-row: 1;
       padding: 14px 20px 10px;
+      border-right: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
       background: var(--surface);
+    }
+
+    /* ── Standings header in col 3 row 1 ── */
+    .standings-header-cell {
+      grid-column: 3;
+      grid-row: 1;
+      padding: 14px 20px 10px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .standings-header-cell h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1rem;
+      letter-spacing: 3px;
+      color: var(--muted);
+      text-align: center;
+      text-transform: uppercase;
+    }
+    .instructions {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.65rem;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.4;
     }
 
     /* ── Arsenal column ── */
@@ -146,7 +171,6 @@
       grid-column: 1;
       grid-row: 2;
       border-right: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
       overflow-y: auto;
       padding: 14px 16px;
       background: var(--bg);
@@ -156,56 +180,17 @@
     .col-mci {
       grid-column: 2;
       grid-row: 2;
-      border-bottom: 1px solid var(--border);
+      border-right: 1px solid var(--border);
       overflow-y: auto;
       padding: 14px 16px;
       background: var(--bg);
     }
 
-    /* ── Bottom bar: full width ── */
-    .bottom-bar {
-      grid-column: 1 / 3;
-      grid-row: 3;
-      background: var(--surface);
+    /* ── Standings column ── */
+    .col-standings {
+      grid-column: 3;
+      grid-row: 2;
       display: flex;
-      align-items: stretch;
-      gap: 0;
-      flex-shrink: 0;
-    }
-
-    /* Buttons section on the left */
-    .bottom-actions {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      padding: 14px 16px;
-      border-right: 1px solid var(--border);
-      justify-content: center;
-      min-width: 180px;
-    }
-
-    /* Table section takes remaining space */
-    .bottom-standings {
-      flex: 1;
-      padding: 12px 20px 14px;
-      overflow: hidden;
-    }
-
-    .bottom-standings-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 8px;
-    }
-
-    .bottom-standings-header h2 {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 0.85rem;
-      letter-spacing: 3px;
-      color: var(--muted);
-      text-transform: uppercase;
-      white-space: nowrap;
-    }
       flex-direction: column;
       overflow: hidden;
       padding: 14px 20px;
@@ -246,7 +231,6 @@
     .clash-team-block { display: flex; flex-direction: column; }
     .clash-team-block.left { align-items: flex-end; }
     .clash-team-block.right { align-items: flex-start; }
-
     .clash-sub {
       font-family: 'DM Mono', monospace;
       font-size: 0.5rem;
@@ -255,7 +239,6 @@
       letter-spacing: 1px;
       margin-bottom: 2px;
     }
-
     .clash-name {
       font-family: 'Bebas Neue', sans-serif;
       font-size: 1.3rem;
@@ -263,14 +246,7 @@
     }
     .clash-name.ars { color: var(--ars-red); }
     .clash-name.mci { color: var(--city-blue); }
-
-    .clash-center {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-    }
-
+    .clash-center { display: flex; flex-direction: column; align-items: center; gap: 4px; }
     .clash-inputs { display: flex; align-items: center; gap: 5px; }
 
     /* ══ TEAM HEADER ══ */
@@ -282,7 +258,6 @@
       padding-bottom: 10px;
       border-bottom: 1px solid var(--border);
     }
-
     .team-crest {
       width: 30px; height: 30px;
       border-radius: 50%;
@@ -293,11 +268,9 @@
     }
     .ars-crest { background: var(--ars-red); color: #fff; }
     .mci-crest { background: var(--city-dark); border: 2px solid var(--city-blue); color: var(--city-blue); }
-
     .team-name { font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 2px; }
     .ars-name { color: var(--ars-red); }
     .mci-name { color: var(--city-blue); }
-
     .team-pts { margin-left: auto; font-family: 'Bebas Neue', sans-serif; font-size: 0.9rem; letter-spacing: 1px; }
     .ars-pts { color: var(--ars-red); }
     .mci-pts { color: var(--city-blue); }
@@ -337,9 +310,7 @@
     }
     .fix-team.home-side { text-align: right; }
     .fix-team.away-side { text-align: left; }
-
     .fix-center { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-
     .score-inputs { display: flex; align-items: center; justify-content: center; gap: 4px; }
 
     .score-input {
@@ -370,7 +341,6 @@
       font-family: 'DM Mono', monospace;
       text-align: center;
     }
-
     .tbd-tag {
       display: inline-block;
       font-family: 'DM Mono', monospace;
@@ -384,8 +354,8 @@
       margin-left: 2px;
     }
 
-    /* ══ STANDINGS ══ */
-    .standings-scroll { overflow: hidden; }
+    /* ══ STANDINGS (desktop: right column) ══ */
+    .standings-scroll { flex: 1; overflow-y: auto; min-height: 0; }
 
     .standings-table { width: 100%; border-collapse: collapse; }
 
@@ -394,10 +364,13 @@
       font-size: 0.55rem;
       color: var(--muted);
       text-align: right;
-      padding: 0 6px 7px;
+      padding: 0 4px 8px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
       border-bottom: 1px solid var(--border);
+      position: sticky; top: 0;
+      background: var(--surface);
+      z-index: 1;
     }
     .standings-table thead th:first-child,
     .standings-table thead th:nth-child(2) { text-align: left; }
@@ -409,7 +382,7 @@
     .standings-table tbody tr:hover { background: var(--row-hover); }
 
     .standings-table td {
-      padding: 6px 6px;
+      padding: 7px 4px;
       text-align: right;
       font-family: 'DM Mono', monospace;
       font-size: 0.7rem;
@@ -425,7 +398,6 @@
     .row-ars td.pts, .row-ars td:nth-child(2) { color: var(--ars-red); }
     .row-mci td { color: #aad6f5; }
     .row-mci td.pts, .row-mci td:nth-child(2) { color: var(--city-blue); }
-
     body.light .row-ars td { color: #b91c1c; }
     body.light .row-ars td.pts, body.light .row-ars td:nth-child(2) { color: var(--ars-red); }
     body.light .row-mci td { color: #1d4ed8; }
@@ -433,6 +405,16 @@
 
     .gd-positive { color: var(--win) !important; }
     .gd-negative { color: var(--loss) !important; }
+
+    .standings-footer {
+      flex-shrink: 0;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
 
     .action-btn {
       display: block; width: 100%; padding: 7px;
@@ -458,22 +440,62 @@
     /* ══ MOBILE ══ */
     @media (max-width: 768px) {
       body { overflow-y: auto; height: auto; }
+
       .root-grid {
+        /* Stack everything in one column, 6 rows */
         grid-template-columns: 1fr;
-        grid-template-rows: auto auto auto auto;
-        overflow-y: auto;
+        grid-template-rows: auto auto auto auto auto auto;
+        overflow-y: visible;
+        height: auto;
       }
-      .clash-row { grid-column: 1; grid-row: 1; }
-      .col-ars { grid-column: 1; grid-row: 2; border-right: none; max-height: none; overflow-y: visible; }
-      .col-mci { grid-column: 1; grid-row: 3; max-height: none; overflow-y: visible; }
-      .bottom-bar { grid-column: 1; grid-row: 4; flex-direction: column; }
-      .bottom-actions { border-right: none; border-bottom: 1px solid var(--border); flex-direction: row; flex-wrap: wrap; }
+
+      /* Row 1: clash */
+      .clash-row {
+        grid-column: 1;
+        grid-row: 1;
+        border-right: none;
+      }
+
+      /* Row 2: Arsenal fixtures */
+      .col-ars {
+        grid-column: 1;
+        grid-row: 2;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        overflow-y: visible;
+        max-height: none;
+      }
+
+      /* Row 3: Man City fixtures */
+      .col-mci {
+        grid-column: 1;
+        grid-row: 3;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        overflow-y: visible;
+        max-height: none;
+      }
+
+      /* Row 4: standings header (hidden on mobile — merged into col-standings) */
+      .standings-header-cell {
+        grid-column: 1;
+        grid-row: 4;
+        border-bottom: 1px solid var(--border);
+      }
+
+      /* Row 5+: full standings column below fixtures */
+      .col-standings {
+        grid-column: 1;
+        grid-row: 5;
+        overflow-y: visible;
+        max-height: none;
+      }
+
       header h1 { font-size: 1.2rem; }
       .badge { font-size: 0.5rem; padding: 1px 4px; }
     }
   </style>
 </head>
-
 <body>
 
   <!-- ══ HEADER ══ -->
@@ -492,7 +514,7 @@
   <!-- ══ ROOT GRID ══ -->
   <div class="root-grid">
 
-    <!-- ── CLASH ROW: spans Arsenal + Man City columns ── -->
+    <!-- ── CLASH ROW: spans cols 1-2 on desktop ── -->
     <div class="clash-row">
       <div class="clash-label-row">
         <div class="divider-line"></div>
@@ -518,6 +540,12 @@
       </div>
     </div>
 
+    <!-- ── STANDINGS HEADER: col 3 on desktop ── -->
+    <div class="standings-header-cell">
+      <h2>Premier League</h2>
+      <p class="instructions">Enter your predictions and share with friends!</p>
+    </div>
+
     <!-- ── ARSENAL COLUMN ── -->
     <div class="col-ars">
       <div class="team-header">
@@ -538,29 +566,22 @@
       <div class="fixtures-grid" id="mci-fixtures"></div>
     </div>
 
-    <!-- ── BOTTOM BAR: buttons + top-5 table ── -->
-    <div class="bottom-bar">
-      <div class="bottom-actions">
+    <!-- ── STANDINGS COLUMN: col 3 on desktop, row 5 on mobile ── -->
+    <div class="col-standings">
+      <div class="standings-scroll">
+        <table class="standings-table">
+          <thead>
+            <tr>
+              <th>#</th><th>Team</th><th>MP</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th>
+            </tr>
+          </thead>
+          <tbody id="standings-body"></tbody>
+        </table>
+      </div>
+      <div class="standings-footer">
         <button class="action-btn" id="reset-btn">↺ Reset to Defaults</button>
         <button class="action-btn" id="random-btn">🎲 Random Scenario</button>
         <button class="action-btn primary" id="share-btn">📤 Share Prediction</button>
-      </div>
-      <div class="bottom-standings">
-        <div class="bottom-standings-header">
-          <div style="flex:1;height:1px;background:var(--border)"></div>
-          <h2>Premier League — Top 5</h2>
-          <div style="flex:1;height:1px;background:var(--border)"></div>
-        </div>
-        <div class="standings-scroll">
-          <table class="standings-table">
-            <thead>
-              <tr>
-                <th>#</th><th>Team</th><th>MP</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th>
-              </tr>
-            </thead>
-            <tbody id="standings-body"></tbody>
-          </table>
-        </div>
       </div>
     </div>
 
@@ -623,7 +644,7 @@
       };
     }
 
-    // ─── RENDER ────────────────────────────────────────────────────────────────
+    // ─── RENDER FIXTURES ──────────────────────────────────────────────────────
     function renderFixtures() {
       renderSet("ars-fixtures", ARS_FIXTURES, "ars");
       renderSet("mci-fixtures", MCI_FIXTURES, "mci");
@@ -687,7 +708,7 @@
     const debouncedUpdate = debounce(updateAll, 150);
 
     function renderStandings(st) {
-      document.getElementById("standings-body").innerHTML = st.slice(0, 5).map((t, i) => {
+      document.getElementById("standings-body").innerHTML = st.slice(0, 10).map((t, i) => {
         const gd = t.gf - t.ga;
         const gdStr = gd > 0 ? `+${gd}` : `${gd}`;
         const gdClass = gd > 0 ? 'gd-positive' : gd < 0 ? 'gd-negative' : '';
@@ -701,14 +722,12 @@
     }
 
     // ─── COMPACT ENCODING ─────────────────────────────────────────────────────
-    // All 26 scores in fixed order → 26-char string (base-11 per digit, 0-a).
-    // Result: ?d=1a20310230... instead of ?data=eyJjbGFzaC1tY2ki... (~75% shorter)
     const SCORE_ORDER = [
       'clash-mci', 'clash-ars',
       ...ARS_FIXTURES.flatMap(f => [`${f.id}-h`, `${f.id}-a`]),
       ...MCI_FIXTURES.flatMap(f => [`${f.id}-h`, `${f.id}-a`]),
     ];
-    const B11 = '0123456789a'; // 0-10 each as one char
+    const B11 = '0123456789a';
 
     function encodeScores() {
       return SCORE_ORDER.map(id => {
@@ -742,10 +761,8 @@
 
     function loadFromUrl() {
       const params = new URLSearchParams(window.location.search);
-      // New compact format: ?d=
       const compact = params.get('d');
       if (compact) { try { return decodeScores(compact); } catch(e) {} }
-      // Legacy base64 JSON: ?data= (old links still work)
       const legacy = params.get('data');
       if (legacy) {
         try {
@@ -784,10 +801,8 @@
     // ─── SHARE ─────────────────────────────────────────────────────────────────
     function sharePredict() {
       const shareUrl = `${window.location.origin}${window.location.pathname}?d=${encodeScores()}`;
-
       const st = computeStandings();
       const winner = st[0].abbr === 'ARS' ? 'Arsenal' : st[0].abbr === 'MCI' ? 'Man City' : st[0].name;
-
       const text = `🏆 EPL Title Race Prediction 2025/26\n\n${winner} wins the title!\n\n1. ${st[0].name} — ${st[0].pts} pts\n2. ${st[1].name} — ${st[1].pts} pts\n\nView my prediction here 👇\n${shareUrl}`;
 
       if (navigator.share) {
