@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EPL Predictor — Arsenal & Man City</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;600&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0d0d0d;
+      --surface: #161616;
+      --border: #2a2a2a;
+      --ars-red: #EF0107;
+      --city-blue: #6CABDD;
+      --city-dark: #1C2C5B;
+      --text: #f0f0f0;
+      --muted: #666;
+      --win: #3ecf6e;
+      --loss: #ef4444;
+      --input-bg: #1e1e1e;
+      --input-border: #333;
+      --row-hover: rgba(255, 255, 255, 0.03);
+      --standings-row-border: #1e1e1e;
+      --tentative-bg: #1a1600;
+      --tentative-border: #3a3000;
+    }
+
+    body.light {
+      --bg: #f2f2f3;
+      --surface: #ffffff;
+      --border: #e0e0e0;
+      --text: #111111;
+      --muted: #999;
+      --win: #16a34a;
+      --loss: #dc2626;
+      --input-bg: #ebebeb;
+      --input-border: #ccc;
+      --row-hover: rgba(0, 0, 0, 0.03);
+      --standings-row-border: #eee;
+      --tentative-bg: #fffbeb;
+      --tentative-border: #fcd34d;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      height: 100%;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ══ HEADER ══ */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+
+    header h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.65rem;
+      letter-spacing: 3px;
+      color: var(--text);
+    }
+
+    .badge {
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.58rem;
+      padding: 2px 6px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .theme-toggle {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .toggle-icon {
+      font-size: 0.82rem;
+    }
+
+    .toggle-track {
+      width: 36px;
+      height: 19px;
+      background: #333;
+      border-radius: 10px;
+      position: relative;
+      transition: background 0.25s;
+      border: 1px solid var(--border);
+    }
+
+    body.light .toggle-track {
+      background: #d1d5db;
+    }
+
+    .toggle-thumb {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 13px;
+      height: 13px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform 0.25s;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    }
+
+    body.light .toggle-thumb {
+      transform: translateX(17px);
+      background: #111;
+    }
+
+    /* ══ ROOT GRID: 3 equal columns ══ */
+    .root-grid {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-rows: auto 1fr;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    /* ── The cross-column clash row spans cols 1-2 ── */
+    .clash-row {
+      grid-column: 1 / 3;
+      grid-row: 1;
+      padding: 14px 20px 10px;
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    /* ── Standings header sits in col 3 row 1 ── */
+    .standings-header-cell {
+      grid-column: 3;
+      grid-row: 1;
+      padding: 14px 20px 10px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .standings-header-cell h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1rem;
+      letter-spacing: 3px;
+      color: var(--muted);
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    /* ── Arsenal column ── */
+    .col-ars {
+      grid-column: 1;
+      grid-row: 2;
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      padding: 14px 16px;
+      background: var(--bg);
+    }
+
+    /* ── Man City column ── */
+    .col-mci {
+      grid-column: 2;
+      grid-row: 2;
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      padding: 14px 16px;
+      background: var(--bg);
+    }
+
+    /* ── Standings column ── */
+    .col-standings {
+      grid-column: 3;
+      grid-row: 2;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      padding: 14px 20px;
+      background: var(--surface);
+    }
+
+    /* ══ CLASH ROW CONTENT ══ */
+    .clash-label-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .clash-label-row .divider-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .clash-label-row span {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 0.65rem;
+      letter-spacing: 2px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .clash-card {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      background: linear-gradient(to right, rgba(239, 1, 7, 0.08), rgba(108, 171, 221, 0.08));
+      border-image: linear-gradient(to right, rgba(239, 1, 7, 0.4), rgba(108, 171, 221, 0.4)) 1;
+      position: relative;
+    }
+
+    body.light .clash-card {
+      background: linear-gradient(to right, rgba(239, 1, 7, 0.05), rgba(108, 171, 221, 0.05));
+    }
+
+    .clash-team-block {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .clash-team-block.left {
+      align-items: flex-end;
+    }
+
+    .clash-team-block.right {
+      align-items: flex-start;
+    }
+
+    .clash-sub {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.5rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 2px;
+    }
+
+    .clash-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.3rem;
+      letter-spacing: 2px;
+    }
+
+    .clash-name.ars {
+      color: var(--ars-red);
+    }
+
+    .clash-name.mci {
+      color: var(--city-blue);
+    }
+
+    .clash-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .clash-date-tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.55rem;
+      color: var(--muted);
+      letter-spacing: 1px;
+    }
+
+    .clash-inputs {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* ══ TEAM HEADER ══ */
+    .team-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .team-crest {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 0.65rem;
+      flex-shrink: 0;
+    }
+
+    .ars-crest {
+      background: var(--ars-red);
+      color: #fff;
+    }
+
+    .mci-crest {
+      background: var(--city-dark);
+      border: 2px solid var(--city-blue);
+      color: var(--city-blue);
+    }
+
+    .team-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1rem;
+      letter-spacing: 2px;
+    }
+
+    .ars-name {
+      color: var(--ars-red);
+    }
+
+    .mci-name {
+      color: var(--city-blue);
+    }
+
+    .team-pts {
+      margin-left: auto;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+    }
+
+    .ars-pts {
+      color: var(--ars-red);
+    }
+
+    .mci-pts {
+      color: var(--city-blue);
+    }
+
+    /* ══ FIXTURE ROWS ══ */
+    .fixtures-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .fixture-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 6px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 7px 10px;
+      transition: border-color 0.2s;
+    }
+
+    .fixture-row:hover {
+      border-color: #444;
+    }
+
+    body.light .fixture-row:hover {
+      border-color: #bbb;
+    }
+
+    .fixture-row.ars-fixture {
+      border-left: 3px solid var(--ars-red);
+    }
+
+    .fixture-row.mci-fixture {
+      border-left: 3px solid var(--city-blue);
+    }
+
+    .fixture-row.tentative {
+      background: var(--tentative-bg);
+      border: 1px solid var(--tentative-border);
+      border-left: 3px solid #f59e0b;
+    }
+
+    .fix-team {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--muted);
+    }
+
+    /* In ARS column: Arsenal is home (left = right-aligned "ARS"), away is opponent */
+    /* In MCI column: Man City is one of the sides */
+    .fix-team.main {
+      color: var(--text);
+    }
+
+    .fix-team.home-side {
+      text-align: right;
+    }
+
+    .fix-team.away-side {
+      text-align: left;
+    }
+
+    .fix-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .score-inputs {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .score-input {
+      width: 36px;
+      height: 30px;
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      border-radius: 4px;
+      color: var(--text);
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1rem;
+      text-align: center;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .score-input:focus {
+      border-color: #555;
+    }
+
+    body.light .score-input:focus {
+      border-color: #888;
+    }
+
+    .score-input.ars-focus:focus {
+      border-color: var(--ars-red);
+    }
+
+    .score-input.mci-focus:focus {
+      border-color: var(--city-blue);
+    }
+
+    /* bigger inputs for clash */
+    .score-input.big {
+      width: 46px;
+      height: 40px;
+      font-size: 1.4rem;
+    }
+
+    .score-sep {
+      font-family: 'Bebas Neue', sans-serif;
+      color: var(--muted);
+    }
+
+    .score-sep.sm {
+      font-size: 1rem;
+    }
+
+    .score-sep.lg {
+      font-size: 1.4rem;
+    }
+
+    .fix-date {
+      font-size: 0.55rem;
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+      text-align: center;
+    }
+
+    .tbd-tag {
+      display: inline-block;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.48rem;
+      background: #f59e0b;
+      color: #000;
+      padding: 1px 4px;
+      border-radius: 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-left: 2px;
+    }
+
+    /* ══ STANDINGS ══ */
+    .standings-scroll {
+      flex: 1;
+      overflow-y: auto;
+      min-height: 0;
+    }
+
+    .standings-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .standings-table thead th {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.55rem;
+      color: var(--muted);
+      text-align: right;
+      padding: 0 4px 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: var(--surface);
+      z-index: 1;
+    }
+
+    .standings-table thead th:first-child,
+    .standings-table thead th:nth-child(2) {
+      text-align: left;
+    }
+
+    .standings-table tbody tr {
+      border-bottom: 1px solid var(--standings-row-border);
+      transition: background 0.15s;
+    }
+
+    .standings-table tbody tr:hover {
+      background: var(--row-hover);
+    }
+
+    .standings-table td {
+      padding: 7px 4px;
+      text-align: right;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+    }
+
+    .standings-table td:first-child {
+      text-align: left;
+      color: var(--muted);
+      width: 20px;
+      font-size: 0.6rem;
+    }
+
+    .standings-table td:nth-child(2) {
+      text-align: left;
+      font-weight: 600;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.7rem;
+    }
+
+    .standings-table td.pts {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1rem;
+      letter-spacing: 1px;
+    }
+
+    .row-ars td {
+      color: #ff9999;
+    }
+
+    .row-ars td.pts,
+    .row-ars td:nth-child(2) {
+      color: var(--ars-red);
+    }
+
+    .row-mci td {
+      color: #aad6f5;
+    }
+
+    .row-mci td.pts,
+    .row-mci td:nth-child(2) {
+      color: var(--city-blue);
+    }
+
+    body.light .row-ars td {
+      color: #b91c1c;
+    }
+
+    body.light .row-ars td.pts,
+    body.light .row-ars td:nth-child(2) {
+      color: var(--ars-red);
+    }
+
+    body.light .row-mci td {
+      color: #1d4ed8;
+    }
+
+    body.light .row-mci td.pts,
+    body.light .row-mci td:nth-child(2) {
+      color: #1d4ed8;
+    }
+
+    .gd-positive {
+      color: var(--win) !important;
+    }
+
+    .gd-negative {
+      color: var(--loss) !important;
+    }
+
+    .standings-footer {
+      flex-shrink: 0;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      margin-top: 8px;
+    }
+
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.58rem;
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+    }
+
+    .legend-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    .reset-btn {
+      display: block;
+      width: 100%;
+      padding: 7px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.6rem;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .reset-btn:hover {
+      border-color: #666;
+      color: var(--text);
+    }
+  </style>
+</head>
+
+<body class="light">
+
+  <!-- ══ HEADER ══ -->
+  <header>
+    <h1>TITLE RACE PREDICTOR</h1>
+    <span class="badge">2025/26</span>
+    <span class="badge" style="color:var(--ars-red);border-color:var(--ars-red)">ARS</span>
+    <span class="badge" style="color:var(--city-blue);border-color:var(--city-blue)">MCI</span>
+    <div class="theme-toggle" onclick="toggleTheme()">
+      <span class="toggle-icon">🌙</span>
+      <div class="toggle-track">
+        <div class="toggle-thumb"></div>
+      </div>
+      <span class="toggle-icon">☀️</span>
+    </div>
+  </header>
+
+  <!-- ══ ROOT GRID ══ -->
+  <div class="root-grid">
+
+    <!-- ── CLASH ROW: spans Arsenal + Man City columns ── -->
+    <div class="clash-row">
+      <div class="clash-label-row">
+        <div class="divider-line"></div>
+        <span>🔥 Man City vs Arsenal — Apr 19 · Etihad</span>
+        <div class="divider-line"></div>
+      </div>
+      <div class="clash-card">
+        <div class="clash-team-block left">
+          <span class="clash-sub">Home</span>
+          <span class="clash-name mci">Man City</span>
+        </div>
+        <div class="clash-center">
+          <div class="clash-inputs">
+            <input type="number" min="0" max="10" class="score-input big mci-focus" id="clash-mci" value="1"
+              oninput="updateAll()">
+            <span class="score-sep lg">–</span>
+            <input type="number" min="0" max="10" class="score-input big ars-focus" id="clash-ars" value="2"
+              oninput="updateAll()">
+          </div>
+        </div>
+        <div class="clash-team-block right">
+          <span class="clash-sub">Away</span>
+          <span class="clash-name ars">Arsenal</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── STANDINGS HEADER in col 3 ── -->
+    <div class="standings-header-cell">
+      <h2>Premier League</h2>
+    </div>
+
+    <!-- ── ARSENAL COLUMN ── -->
+    <div class="col-ars">
+      <div class="team-header">
+        <div class="team-crest ars-crest">ARS</div>
+        <div class="team-name ars-name">Arsenal FC</div>
+        <div class="team-pts ars-pts">70 pts</div>
+      </div>
+      <div class="fixtures-grid" id="ars-fixtures"></div>
+    </div>
+
+    <!-- ── MAN CITY COLUMN ── -->
+    <div class="col-mci">
+      <div class="team-header">
+        <div class="team-crest mci-crest">MCI</div>
+        <div class="team-name mci-name">Man City</div>
+        <div class="team-pts mci-pts">64 pts</div>
+      </div>
+      <div class="fixtures-grid" id="mci-fixtures"></div>
+    </div>
+
+    <!-- ── STANDINGS COLUMN ── -->
+    <div class="col-standings">
+      <div class="standings-scroll">
+        <table class="standings-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Team</th>
+              <th>MP</th>
+              <th>W</th>
+              <th>D</th>
+              <th>L</th>
+              <th>GD</th>
+              <th>Pts</th>
+            </tr>
+          </thead>
+          <tbody id="standings-body"></tbody>
+        </table>
+      </div>
+      <div class="standings-footer">
+        <div class="legend">
+          <div class="legend-item">
+            <div class="legend-dot" style="background:var(--ars-red)"></div>Arsenal
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:var(--city-blue)"></div>Man City
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:#f59e0b"></div>Tentative
+          </div>
+        </div>
+        <button class="reset-btn" onclick="resetAll()">↺ Reset All Predictions</button>
+      </div>
+    </div>
+
+  </div><!-- end root-grid -->
+
+  <script>
+    // ─── DATA ──────────────────────────────────────────────────────────────────
+    const BASE_STANDINGS = [
+      { name: "Arsenal FC", abbr: "ARS", w: 21, d: 7, l: 4, pts: 70, mp: 32, gf: 67, ga: 34 },
+      { name: "Manchester City", abbr: "MCI", w: 19, d: 7, l: 5, pts: 64, mp: 31, gf: 59, ga: 30 },
+      { name: "Manchester United", abbr: "MUN", w: 15, d: 10, l: 6, pts: 55, mp: 31, gf: 45, ga: 30 },
+      { name: "Aston Villa", abbr: "AVL", w: 16, d: 7, l: 9, pts: 55, mp: 32, gf: 52, ga: 38 },
+      { name: "Liverpool FC", abbr: "LFC", w: 15, d: 7, l: 10, pts: 52, mp: 32, gf: 55, ga: 45 },
+      { name: "Chelsea FC", abbr: "CFC", w: 13, d: 9, l: 10, pts: 48, mp: 32, gf: 50, ga: 44 },
+      { name: "Brentford FC", abbr: "BRE", w: 13, d: 8, l: 11, pts: 47, mp: 32, gf: 48, ga: 43 },
+      { name: "Everton FC", abbr: "EVE", w: 13, d: 8, l: 11, pts: 47, mp: 32, gf: 44, ga: 42 },
+      { name: "Brighton", abbr: "BRI", w: 12, d: 10, l: 10, pts: 46, mp: 32, gf: 50, ga: 44 },
+      { name: "Sunderland AFC", abbr: "SUN", w: 12, d: 10, l: 10, pts: 46, mp: 32, gf: 42, ga: 40 },
+      { name: "AFC Bournemouth", abbr: "BOU", w: 10, d: 15, l: 7, pts: 45, mp: 32, gf: 40, ga: 35 },
+      { name: "Fulham FC", abbr: "FUL", w: 13, d: 5, l: 14, pts: 44, mp: 32, gf: 47, ga: 48 },
+      { name: "Crystal Palace", abbr: "CRY", w: 11, d: 9, l: 11, pts: 42, mp: 31, gf: 38, ga: 38 },
+      { name: "Newcastle United", abbr: "NEW", w: 12, d: 6, l: 14, pts: 42, mp: 32, gf: 43, ga: 48 },
+      { name: "Leeds United", abbr: "LEE", w: 7, d: 12, l: 12, pts: 33, mp: 31, gf: 30, ga: 40 },
+      { name: "Nottm Forest", abbr: "NFO", w: 8, d: 9, l: 15, pts: 33, mp: 32, gf: 30, ga: 48 },
+      { name: "West Ham United", abbr: "WHU", w: 8, d: 8, l: 16, pts: 32, mp: 32, gf: 28, ga: 50 },
+      { name: "Tottenham Hotspur", abbr: "TOT", w: 7, d: 9, l: 16, pts: 30, mp: 32, gf: 32, ga: 52 },
+      { name: "Burnley FC", abbr: "BUR", w: 4, d: 8, l: 20, pts: 20, mp: 32, gf: 20, ga: 60 },
+      { name: "Wolverhampton", abbr: "WOL", w: 3, d: 8, l: 21, pts: 17, mp: 32, gf: 18, ga: 65 },
+    ];
+
+    // Arsenal fixtures — shown in ARS column
+    // home side first, then away. Arsenal is always one side; opponent label shown for the other.
+    const ARS_FIXTURES = [
+      { id: "ars-new", date: "Apr 25", home: "ARS", away: "NEW", homeLabel: "Arsenal", awayLabel: "Newcastle", tentative: false },
+      { id: "ars-ful", date: "May 2", home: "ARS", away: "FUL", homeLabel: "Arsenal", awayLabel: "Fulham", tentative: false },
+      { id: "whu-ars", date: "May 10", home: "WHU", away: "ARS", homeLabel: "West Ham", awayLabel: "Arsenal", tentative: false },
+      { id: "ars-bur", date: "May 17", home: "ARS", away: "BUR", homeLabel: "Arsenal", awayLabel: "Burnley", tentative: false },
+      { id: "cry-ars", date: "May 24", home: "CRY", away: "ARS", homeLabel: "Crystal Palace", awayLabel: "Arsenal", tentative: false },
+    ];
+
+    // Man City fixtures — shown in MCI column
+    const MCI_FIXTURES = [
+      { id: "bur-mci", date: "Apr 22", home: "BUR", away: "MCI", homeLabel: "Burnley", awayLabel: "Man City", tentative: false },
+      { id: "eve-mci", date: "May 4", home: "EVE", away: "MCI", homeLabel: "Everton", awayLabel: "Man City", tentative: false },
+      { id: "mci-bre", date: "May 9", home: "MCI", away: "BRE", homeLabel: "Man City", awayLabel: "Brentford", tentative: false },
+      { id: "bou-mci", date: "May 17", home: "BOU", away: "MCI", homeLabel: "Bournemouth", awayLabel: "Man City", tentative: false },
+      { id: "mci-cry", date: "TBD", home: "MCI", away: "CRY", homeLabel: "Man City", awayLabel: "Crystal Palace", tentative: true },
+      { id: "mci-avl", date: "May 24", home: "MCI", away: "AVL", homeLabel: "Man City", awayLabel: "Aston Villa", tentative: false },
+    ];
+
+    // ─── RENDER ────────────────────────────────────────────────────────────────
+    function renderFixtures() {
+      renderSet("ars-fixtures", ARS_FIXTURES, "ars");
+      renderSet("mci-fixtures", MCI_FIXTURES, "mci");
+    }
+
+    function renderSet(containerId, fixtures, team) {
+      const color = team === "ars" ? "ars" : "mci";
+      document.getElementById(containerId).innerHTML = fixtures.map(f => {
+        const cls = f.tentative ? "fixture-row tentative" : `fixture-row ${color}-fixture`;
+        const tag = f.tentative ? `<span class="tbd-tag">Tentative</span>` : "";
+        return `<div class="${cls}">
+      <div class="fix-team home-side">${f.homeLabel}</div>
+      <div class="fix-center">
+        <div class="score-inputs">
+          <input type="number" min="0" max="10" class="score-input ${color}-focus" id="${f.id}-h" value="0" oninput="updateAll()">
+          <span class="score-sep sm">–</span>
+          <input type="number" min="0" max="10" class="score-input ${color}-focus" id="${f.id}-a" value="0" oninput="updateAll()">
+        </div>
+        <div class="fix-date">${f.date}${tag}</div>
+      </div>
+      <div class="fix-team away-side">${f.awayLabel}</div>
+    </div>`;
+      }).join('');
+    }
+
+    // ─── LOGIC ─────────────────────────────────────────────────────────────────
+    function getScore(id) {
+      const el = document.getElementById(id);
+      return (!el || el.value === '') ? 0 : parseInt(el.value, 10);
+    }
+
+    function applyFixture(st, homeAbbr, awayAbbr, hs, as_) {
+      const h = st.find(t => t.abbr === homeAbbr);
+      const a = st.find(t => t.abbr === awayAbbr);
+      if (!h || !a) return;
+      h.mp++; a.mp++;
+      h.gf += hs; h.ga += as_; a.gf += as_; a.ga += hs;
+      if (hs > as_) { h.w++; h.pts += 3; a.l++; }
+      else if (hs < as_) { a.w++; a.pts += 3; h.l++; }
+      else { h.d++; h.pts++; a.d++; a.pts++; }
+    }
+
+    function updateAll() {
+      const st = BASE_STANDINGS.map(t => ({ ...t }));
+      applyFixture(st, "MCI", "ARS", getScore("clash-mci"), getScore("clash-ars"));
+      ARS_FIXTURES.forEach(f => applyFixture(st, f.home, f.away, getScore(`${f.id}-h`), getScore(`${f.id}-a`)));
+      MCI_FIXTURES.forEach(f => applyFixture(st, f.home, f.away, getScore(`${f.id}-h`), getScore(`${f.id}-a`)));
+      st.sort((a, b) => {
+        if (b.pts !== a.pts) return b.pts - a.pts;
+        const gd = (b.gf - b.ga) - (a.gf - a.ga);
+        return gd !== 0 ? gd : b.gf - a.gf;
+      });
+      renderStandings(st);
+    }
+
+    function renderStandings(st) {
+      document.getElementById("standings-body").innerHTML = st.slice(0, 10).map((t, i) => {
+        const gd = t.gf - t.ga;
+        const gdStr = gd > 0 ? `+${gd}` : `${gd}`;
+        const gdClass = gd > 0 ? 'gd-positive' : gd < 0 ? 'gd-negative' : '';
+        const rowClass = t.abbr === "ARS" ? "row-ars" : t.abbr === "MCI" ? "row-mci" : "";
+        return `<tr class="${rowClass}">
+      <td>${i + 1}</td><td>${t.name}</td>
+      <td>${t.mp}</td><td>${t.w}</td><td>${t.d}</td><td>${t.l}</td>
+      <td class="${gdClass}">${gdStr}</td><td class="pts">${t.pts}</td>
+    </tr>`;
+      }).join('');
+    }
+
+    function resetAll() {
+      document.querySelectorAll('.score-input').forEach(el => el.value = '0');
+      updateAll();
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle('light');
+    }
+
+    renderFixtures();
+    updateAll();
+  </script>
+</body>
+
+</html>
