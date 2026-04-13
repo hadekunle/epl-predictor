@@ -180,8 +180,10 @@
       border-bottom: 1px solid var(--border);
       background: var(--surface);
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
+      gap: 8px;
     }
 
     .standings-header-cell h2 {
@@ -191,6 +193,15 @@
       color: var(--muted);
       text-align: center;
       text-transform: uppercase;
+    }
+
+    .instructions {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.65rem;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.4;
+      max-width: 280px;
     }
 
     /* ── Arsenal column ── */
@@ -649,28 +660,6 @@
       margin-top: 8px;
     }
 
-    .legend {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      margin-bottom: 8px;
-    }
-
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 0.58rem;
-      color: var(--muted);
-      font-family: 'DM Mono', monospace;
-    }
-
-    .legend-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-    }
-
     .reset-btn {
       display: block;
       width: 100%;
@@ -785,7 +774,7 @@
   </style>
 </head>
 
-<body class="light">
+<body>
 
   <!-- ══ HEADER ══ -->
   <header>
@@ -809,7 +798,7 @@
     <div class="clash-row">
       <div class="clash-label-row">
         <div class="divider-line"></div>
-        <span>🔥 Man City vs Arsenal — Apr 19 · Etihad</span>
+        <span>Man City vs Arsenal — Apr 19 · Etihad</span>
         <div class="divider-line"></div>
       </div>
       <div class="clash-card">
@@ -834,6 +823,7 @@
     <!-- ── STANDINGS HEADER in col 3 ── -->
     <div class="standings-header-cell">
       <h2>Premier League</h2>
+      <p class="instructions">Enter your predictions and share with friends!</p>
     </div>
 
     <!-- ── ARSENAL COLUMN ── -->
@@ -876,11 +866,6 @@
         </table>
       </div>
       <div class="standings-footer">
-        <div class="legend">
-          <div class="legend-item">
-            <div class="legend-dot" style="background:#f59e0b"></div>Tentative
-          </div>
-        </div>
         <button class="reset-btn" id="reset-btn">↺ Reset to Realistic Defaults</button>
         <button class="action-btn" id="random-btn">🎲 Random Scenario</button>
         <button class="action-btn primary" id="share-btn">📤 Share Prediction</button>
