@@ -5,6 +5,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>EPL Predictor — Arsenal & Man City</title>
+  <meta property="og:title" content="EPL Title Race Predictor 2025/26">
+  <meta property="og:description" content="Predict the Premier League title race between Arsenal and Man City">
+  <meta property="og:image" content="https://via.placeholder.com/1200x630/EF0107/FFFFFF?text=EPL+Predictor">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
   <link
     href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;600&display=swap"
     rel="stylesheet">
@@ -63,6 +68,14 @@
       flex-direction: column;
       height: 100vh;
       overflow: hidden;
+      opacity: 0;
+      animation: fadeIn 0.3s ease-in forwards;
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
     }
 
     /* ══ HEADER ══ */
@@ -678,6 +691,97 @@
       border-color: #666;
       color: var(--text);
     }
+
+    .action-btn {
+      display: block;
+      width: 100%;
+      padding: 7px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.6rem;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: border-color 0.2s, color 0.2s;
+      margin-top: 6px;
+    }
+
+    .action-btn:hover {
+      border-color: #666;
+      color: var(--text);
+    }
+
+    .action-btn.primary {
+      background: var(--ars-red);
+      border-color: var(--ars-red);
+      color: #fff;
+    }
+
+    .action-btn.primary:hover {
+      opacity: 0.9;
+    }
+
+    /* ══ MOBILE RESPONSIVE ══ */
+    @media (max-width: 768px) {
+      body {
+        overflow-y: auto;
+        height: auto;
+      }
+
+      .root-grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto auto auto;
+        overflow-y: auto;
+      }
+
+      .clash-row {
+        grid-column: 1;
+        grid-row: 1;
+        border-right: none;
+      }
+
+      .standings-header-cell {
+        grid-column: 1;
+        grid-row: 2;
+      }
+
+      .col-standings {
+        grid-column: 1;
+        grid-row: 3;
+        max-height: none;
+        overflow-y: visible;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .col-ars {
+        grid-column: 1;
+        grid-row: 4;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        max-height: none;
+        overflow-y: visible;
+      }
+
+      .col-mci {
+        grid-column: 1;
+        grid-row: 5;
+        border-right: none;
+        max-height: none;
+        overflow-y: visible;
+      }
+
+      header h1 {
+        font-size: 1.2rem;
+      }
+
+      .badge {
+        font-size: 0.5rem;
+        padding: 1px 4px;
+      }
+    }
   </style>
 </head>
 
@@ -689,7 +793,7 @@
     <span class="badge">2025/26</span>
     <span class="badge" style="color:var(--ars-red);border-color:var(--ars-red)">ARS</span>
     <span class="badge" style="color:var(--city-blue);border-color:var(--city-blue)">MCI</span>
-    <div class="theme-toggle" onclick="toggleTheme()">
+    <div class="theme-toggle" id="theme-toggle">
       <span class="toggle-icon">🌙</span>
       <div class="toggle-track">
         <div class="toggle-thumb"></div>
@@ -715,11 +819,9 @@
         </div>
         <div class="clash-center">
           <div class="clash-inputs">
-            <input type="number" min="0" max="10" class="score-input big mci-focus" id="clash-mci" value="1"
-              oninput="updateAll()">
+            <input type="number" min="0" max="10" class="score-input big mci-focus" id="clash-mci" data-fixture="clash">
             <span class="score-sep lg">–</span>
-            <input type="number" min="0" max="10" class="score-input big ars-focus" id="clash-ars" value="2"
-              oninput="updateAll()">
+            <input type="number" min="0" max="10" class="score-input big ars-focus" id="clash-ars" data-fixture="clash">
           </div>
         </div>
         <div class="clash-team-block right">
@@ -776,22 +878,23 @@
       <div class="standings-footer">
         <div class="legend">
           <div class="legend-item">
-            <div class="legend-dot" style="background:var(--ars-red)"></div>Arsenal
-          </div>
-          <div class="legend-item">
-            <div class="legend-dot" style="background:var(--city-blue)"></div>Man City
-          </div>
-          <div class="legend-item">
             <div class="legend-dot" style="background:#f59e0b"></div>Tentative
           </div>
         </div>
-        <button class="reset-btn" onclick="resetAll()">↺ Reset All Predictions</button>
+        <button class="reset-btn" id="reset-btn">↺ Reset to Realistic Defaults</button>
+        <button class="action-btn" id="random-btn">🎲 Random Scenario</button>
+        <button class="action-btn primary" id="share-btn">📤 Share Prediction</button>
       </div>
     </div>
 
   </div><!-- end root-grid -->
 
   <script>
+    // ─── CONSTANTS ─────────────────────────────────────────────────────────────
+    const STORAGE_VERSION = 1;
+    const STORAGE_KEY = 'epl-predictor-v' + STORAGE_VERSION;
+    const THEME_KEY = 'epl-predictor-theme';
+
     // ─── DATA ──────────────────────────────────────────────────────────────────
     const BASE_STANDINGS = [
       { name: "Arsenal FC", abbr: "ARS", w: 21, d: 7, l: 4, pts: 70, mp: 32, gf: 67, ga: 34 },
@@ -816,25 +919,37 @@
       { name: "Wolverhampton", abbr: "WOL", w: 3, d: 8, l: 21, pts: 17, mp: 32, gf: 18, ga: 65 },
     ];
 
-    // Arsenal fixtures — shown in ARS column
-    // home side first, then away. Arsenal is always one side; opponent label shown for the other.
     const ARS_FIXTURES = [
-      { id: "ars-new", date: "Apr 25", home: "ARS", away: "NEW", homeLabel: "Arsenal", awayLabel: "Newcastle", tentative: false },
-      { id: "ars-ful", date: "May 2", home: "ARS", away: "FUL", homeLabel: "Arsenal", awayLabel: "Fulham", tentative: false },
-      { id: "whu-ars", date: "May 10", home: "WHU", away: "ARS", homeLabel: "West Ham", awayLabel: "Arsenal", tentative: false },
-      { id: "ars-bur", date: "May 17", home: "ARS", away: "BUR", homeLabel: "Arsenal", awayLabel: "Burnley", tentative: false },
-      { id: "cry-ars", date: "May 24", home: "CRY", away: "ARS", homeLabel: "Crystal Palace", awayLabel: "Arsenal", tentative: false },
+      { id: "ars-new", date: "Apr 25", home: "ARS", away: "NEW", homeLabel: "Arsenal", awayLabel: "Newcastle", tentative: false, defaultHome: 2, defaultAway: 1 },
+      { id: "ars-ful", date: "May 2", home: "ARS", away: "FUL", homeLabel: "Arsenal", awayLabel: "Fulham", tentative: false, defaultHome: 3, defaultAway: 1 },
+      { id: "whu-ars", date: "May 10", home: "WHU", away: "ARS", homeLabel: "West Ham", awayLabel: "Arsenal", tentative: false, defaultHome: 1, defaultAway: 2 },
+      { id: "ars-bur", date: "May 17", home: "ARS", away: "BUR", homeLabel: "Arsenal", awayLabel: "Burnley", tentative: false, defaultHome: 3, defaultAway: 0 },
+      { id: "cry-ars", date: "May 24", home: "CRY", away: "ARS", homeLabel: "Crystal Palace", awayLabel: "Arsenal", tentative: false, defaultHome: 2, defaultAway: 2 },
     ];
 
-    // Man City fixtures — shown in MCI column
     const MCI_FIXTURES = [
-      { id: "bur-mci", date: "Apr 22", home: "BUR", away: "MCI", homeLabel: "Burnley", awayLabel: "Man City", tentative: false },
-      { id: "eve-mci", date: "May 4", home: "EVE", away: "MCI", homeLabel: "Everton", awayLabel: "Man City", tentative: false },
-      { id: "mci-bre", date: "May 9", home: "MCI", away: "BRE", homeLabel: "Man City", awayLabel: "Brentford", tentative: false },
-      { id: "bou-mci", date: "May 17", home: "BOU", away: "MCI", homeLabel: "Bournemouth", awayLabel: "Man City", tentative: false },
-      { id: "mci-cry", date: "TBD", home: "MCI", away: "CRY", homeLabel: "Man City", awayLabel: "Crystal Palace", tentative: true },
-      { id: "mci-avl", date: "May 24", home: "MCI", away: "AVL", homeLabel: "Man City", awayLabel: "Aston Villa", tentative: false },
+      { id: "bur-mci", date: "Apr 22", home: "BUR", away: "MCI", homeLabel: "Burnley", awayLabel: "Man City", tentative: false, defaultHome: 0, defaultAway: 3 },
+      { id: "eve-mci", date: "May 4", home: "EVE", away: "MCI", homeLabel: "Everton", awayLabel: "Man City", tentative: false, defaultHome: 1, defaultAway: 2 },
+      { id: "mci-bre", date: "May 9", home: "MCI", away: "BRE", homeLabel: "Man City", awayLabel: "Brentford", tentative: false, defaultHome: 3, defaultAway: 1 },
+      { id: "bou-mci", date: "May 17", home: "BOU", away: "MCI", homeLabel: "Bournemouth", awayLabel: "Man City", tentative: false, defaultHome: 1, defaultAway: 3 },
+      { id: "mci-cry", date: "TBD", home: "MCI", away: "CRY", homeLabel: "Man City", awayLabel: "Crystal Palace", tentative: true, defaultHome: 2, defaultAway: 0 },
+      { id: "mci-avl", date: "May 24", home: "MCI", away: "AVL", homeLabel: "Man City", awayLabel: "Aston Villa", tentative: false, defaultHome: 2, defaultAway: 2 },
     ];
+
+    const CLASH_DEFAULTS = { home: 1, away: 2 };
+
+    // ─── DEBOUNCE UTILITY ──────────────────────────────────────────────────────
+    function debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
+    }
 
     // ─── RENDER ────────────────────────────────────────────────────────────────
     function renderFixtures() {
@@ -851,9 +966,9 @@
       <div class="fix-team home-side">${f.homeLabel}</div>
       <div class="fix-center">
         <div class="score-inputs">
-          <input type="number" min="0" max="10" class="score-input ${color}-focus" id="${f.id}-h" value="0" oninput="updateAll()">
+          <input type="number" min="0" max="10" class="score-input ${color}-focus" id="${f.id}-h" data-fixture="${f.id}">
           <span class="score-sep sm">–</span>
-          <input type="number" min="0" max="10" class="score-input ${color}-focus" id="${f.id}-a" value="0" oninput="updateAll()">
+          <input type="number" min="0" max="10" class="score-input ${color}-focus" id="${f.id}-a" data-fixture="${f.id}">
         </div>
         <div class="fix-date">${f.date}${tag}</div>
       </div>
@@ -890,10 +1005,13 @@
         return gd !== 0 ? gd : b.gf - a.gf;
       });
       renderStandings(st);
+      saveState();
     }
 
+    const debouncedUpdateAll = debounce(updateAll, 150);
+
     function renderStandings(st) {
-      document.getElementById("standings-body").innerHTML = st.slice(0, 10).map((t, i) => {
+      document.getElementById("standings-body").innerHTML = st.slice(0, 2).map((t, i) => {
         const gd = t.gf - t.ga;
         const gdStr = gd > 0 ? `+${gd}` : `${gd}`;
         const gdClass = gd > 0 ? 'gd-positive' : gd < 0 ? 'gd-negative' : '';
@@ -906,17 +1024,163 @@
       }).join('');
     }
 
-    function resetAll() {
-      document.querySelectorAll('.score-input').forEach(el => el.value = '0');
+    // ─── STORAGE ───────────────────────────────────────────────────────────────
+    function saveState() {
+      const state = {};
+      document.querySelectorAll('.score-input').forEach(el => {
+        state[el.id] = el.value;
+      });
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {
+        console.warn('Failed to save state:', e);
+      }
+    }
+
+    function loadState() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const state = JSON.parse(saved);
+          Object.keys(state).forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = state[id];
+          });
+          return true;
+        }
+      } catch (e) {
+        console.warn('Failed to load state:', e);
+      }
+      return false;
+    }
+
+    function loadFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const data = params.get('data');
+      if (data) {
+        try {
+          const decoded = JSON.parse(atob(data));
+          Object.keys(decoded).forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = decoded[id];
+          });
+          return true;
+        } catch (e) {
+          console.warn('Failed to load from URL:', e);
+        }
+      }
+      return false;
+    }
+
+    function resetToDefaults() {
+      document.getElementById('clash-mci').value = CLASH_DEFAULTS.home;
+      document.getElementById('clash-ars').value = CLASH_DEFAULTS.away;
+      ARS_FIXTURES.forEach(f => {
+        document.getElementById(`${f.id}-h`).value = f.defaultHome;
+        document.getElementById(`${f.id}-a`).value = f.defaultAway;
+      });
+      MCI_FIXTURES.forEach(f => {
+        document.getElementById(`${f.id}-h`).value = f.defaultHome;
+        document.getElementById(`${f.id}-a`).value = f.defaultAway;
+      });
       updateAll();
+    }
+
+    function fillRandomScenario() {
+      const randomScore = () => Math.floor(Math.random() * 5);
+      document.querySelectorAll('.score-input').forEach(el => {
+        el.value = randomScore();
+      });
+      updateAll();
+    }
+
+    function sharePredict() {
+      const state = {};
+      document.querySelectorAll('.score-input').forEach(el => {
+        state[el.id] = el.value;
+      });
+
+      const encoded = btoa(JSON.stringify(state));
+      const shareUrl = `${window.location.origin}${window.location.pathname}?data=${encoded}`;
+
+      const clashMci = getScore('clash-mci');
+      const clashArs = getScore('clash-ars');
+      const st = BASE_STANDINGS.map(t => ({ ...t }));
+      applyFixture(st, "MCI", "ARS", clashMci, clashArs);
+      ARS_FIXTURES.forEach(f => applyFixture(st, f.home, f.away, getScore(`${f.id}-h`), getScore(`${f.id}-a`)));
+      MCI_FIXTURES.forEach(f => applyFixture(st, f.home, f.away, getScore(`${f.id}-h`), getScore(`${f.id}-a`)));
+      st.sort((a, b) => {
+        if (b.pts !== a.pts) return b.pts - a.pts;
+        const gd = (b.gf - b.ga) - (a.gf - a.ga);
+        return gd !== 0 ? gd : b.gf - a.gf;
+      });
+
+      const winner = st[0].abbr === 'ARS' ? 'Arsenal' : 'Man City';
+
+      const text = `🏆 EPL Title Race Prediction 2025/26\n\n${winner} wins the title!\n\n1. ${st[0].name} - ${st[0].pts} pts\n2. ${st[1].name} - ${st[1].pts} pts\n\nClash: Man City ${clashMci}-${clashArs} Arsenal\n\nMake your prediction: ${shareUrl}`;
+
+      if (navigator.share) {
+        navigator.share({
+          title: 'EPL Title Race Prediction',
+          text: text,
+          url: shareUrl
+        }).catch(() => { });
+      } else {
+        navigator.clipboard.writeText(text).then(() => {
+          alert('Prediction link copied to clipboard!');
+        }).catch(() => {
+          alert('Unable to share. Please copy manually.');
+        });
+      }
+    }
+
+    // ─── THEME ─────────────────────────────────────────────────────────────────
+    function initTheme() {
+      const savedTheme = localStorage.getItem(THEME_KEY);
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+      if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+        document.body.classList.remove('light');
+      } else {
+        document.body.classList.add('light');
+      }
     }
 
     function toggleTheme() {
       document.body.classList.toggle('light');
+      const theme = document.body.classList.contains('light') ? 'light' : 'dark';
+      localStorage.setItem(THEME_KEY, theme);
     }
 
-    renderFixtures();
-    updateAll();
+    // ─── EVENT LISTENERS ───────────────────────────────────────────────────────
+    function attachEventListeners() {
+      document.querySelectorAll('.score-input').forEach(input => {
+        input.addEventListener('input', debouncedUpdateAll);
+      });
+
+      document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+      document.getElementById('reset-btn').addEventListener('click', resetToDefaults);
+      document.getElementById('random-btn').addEventListener('click', fillRandomScenario);
+      document.getElementById('share-btn').addEventListener('click', sharePredict);
+    }
+
+    // ─── INIT ──────────────────────────────────────────────────────────────────
+    function init() {
+      initTheme();
+      renderFixtures();
+
+      if (loadFromUrl()) {
+        updateAll();
+      } else if (!loadState()) {
+        resetToDefaults();
+      } else {
+        updateAll();
+      }
+
+      attachEventListeners();
+    }
+
+    init();
   </script>
 </body>
 
