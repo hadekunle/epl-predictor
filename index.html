@@ -652,6 +652,31 @@
       color: var(--loss) !important;
     }
 
+    /* Position indicators */
+    .standings-table tbody tr.pos-ucl {
+      border-left: 4px solid #0066cc;
+    }
+
+    .standings-table tbody tr.pos-europa {
+      border-left: 4px solid #ff6600;
+    }
+
+    .standings-table tbody tr.pos-relegation {
+      border-left: 4px solid #dc2626;
+    }
+
+    body.light .standings-table tbody tr.pos-ucl {
+      border-left: 4px solid #0066cc;
+    }
+
+    body.light .standings-table tbody tr.pos-europa {
+      border-left: 4px solid #ff6600;
+    }
+
+    body.light .standings-table tbody tr.pos-relegation {
+      border-left: 4px solid #dc2626;
+    }
+
     .standings-footer {
       flex-shrink: 0;
       padding-top: 10px;
@@ -660,6 +685,42 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
+    }
+
+    .standings-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 8px 0;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.55rem;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 6px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .legend-bar {
+      width: 16px;
+      height: 3px;
+      border-radius: 1px;
+    }
+
+    .legend-bar.ucl {
+      background: #0066cc;
+    }
+
+    .legend-bar.europa {
+      background: #ff6600;
+    }
+
+    .legend-bar.relegation {
+      background: #dc2626;
     }
 
     .action-btn {
@@ -855,6 +916,20 @@
         </table>
       </div>
       <div class="standings-footer">
+        <div class="standings-legend">
+          <div class="legend-item">
+            <div class="legend-bar ucl"></div>
+            <span>UCL</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-bar europa"></div>
+            <span>UEL</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-bar relegation"></div>
+            <span>REL</span>
+          </div>
+        </div>
         <button class="action-btn" id="reset-btn">↺ Reset to Defaults</button>
         <button class="action-btn" id="random-btn">🎲 Random Scenario</button>
         <button class="action-btn primary" id="share-btn">📤 Share Prediction</button>
@@ -978,12 +1053,25 @@
     const debouncedUpdate = debounce(updateAll, 150);
 
     function renderStandings(st) {
-      document.getElementById("standings-body").innerHTML = st.slice(0, 10).map((t, i) => {
+      document.getElementById("standings-body").innerHTML = st.map((t, i) => {
         const gd = t.gf - t.ga;
         const gdStr = gd > 0 ? `+${gd}` : `${gd}`;
         const gdClass = gd > 0 ? 'gd-positive' : gd < 0 ? 'gd-negative' : '';
+
+        // Determine position class
+        let posClass = '';
+        if (i < 4) {
+          posClass = 'pos-ucl'; // Top 4: Champions League
+        } else if (i === 4) {
+          posClass = 'pos-europa'; // 5th: Europa League
+        } else if (i >= 17) {
+          posClass = 'pos-relegation'; // Bottom 3: Relegation
+        }
+
         const rowClass = t.abbr === "ARS" ? "row-ars" : t.abbr === "MCI" ? "row-mci" : "";
-        return `<tr class="${rowClass}">
+        const combinedClass = `${rowClass} ${posClass}`.trim();
+
+        return `<tr class="${combinedClass}">
           <td>${i + 1}</td><td>${t.name}</td>
           <td>${t.mp}</td><td>${t.w}</td><td>${t.d}</td><td>${t.l}</td>
           <td class="${gdClass}">${gdStr}</td><td class="pts">${t.pts}</td>
