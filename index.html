@@ -657,6 +657,10 @@
       border-left: 4px solid #0066cc;
     }
 
+    .standings-table tbody tr.pos-uefa {
+      border-left: 4px solid #9333ea;
+    }
+
     .standings-table tbody tr.pos-europa {
       border-left: 4px solid #ff6600;
     }
@@ -667,6 +671,10 @@
 
     body.light .standings-table tbody tr.pos-ucl {
       border-left: 4px solid #0066cc;
+    }
+
+    body.light .standings-table tbody tr.pos-uefa {
+      border-left: 4px solid #9333ea;
     }
 
     body.light .standings-table tbody tr.pos-europa {
@@ -713,6 +721,10 @@
 
     .legend-bar.ucl {
       background: #0066cc;
+    }
+
+    .legend-bar.uefa {
+      background: #9333ea;
     }
 
     .legend-bar.europa {
@@ -922,6 +934,10 @@
             <span>UCL</span>
           </div>
           <div class="legend-item">
+            <div class="legend-bar uefa"></div>
+            <span>UEFA</span>
+          </div>
+          <div class="legend-item">
             <div class="legend-bar europa"></div>
             <span>UEL</span>
           </div>
@@ -1063,7 +1079,9 @@
         if (i < 4) {
           posClass = 'pos-ucl'; // Top 4: Champions League
         } else if (i === 4) {
-          posClass = 'pos-europa'; // 5th: Europa League
+          posClass = 'pos-uefa'; // 5th: UEFA qualification
+        } else if (i === 5 || i === 6) {
+          posClass = 'pos-europa'; // 6th-7th: Europa League
         } else if (i >= 17) {
           posClass = 'pos-relegation'; // Bottom 3: Relegation
         }
