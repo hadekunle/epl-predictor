@@ -1050,13 +1050,83 @@
     }
 
     function computeStandings() {
-      const st = BASE_STANDINGS.map(t => ({ ...t }));
+      const st = BASE_STANDINGS.map(t => ({ ...t, h2hPts: 0, h2hGD: 0, h2hAway: 0 }));
       ARS_FIXTURES.forEach(f => applyFixture(st, f.home, f.away, getScore(`${f.id}-h`), getScore(`${f.id}-a`)));
       MCI_FIXTURES.forEach(f => applyFixture(st, f.home, f.away, getScore(`${f.id}-h`), getScore(`${f.id}-a`)));
+
+      // Calculate head-to-head for Arsenal vs Man City
+      const ars = st.find(t => t.abbr === 'ARS');
+      const mci = st.find(t => t.abbr === 'MCI');
+
+      // Check if there's a direct match between them in the fixtures
+      const allFixtures = [...ARS_FIXTURES, ...MCI_FIXTURES];
+      allFixtures.forEach(f => {
+        const homeScore = getScore(`${f.id}-h`);
+        const awayScore = getScore(`${f.id}-a`);
+
+        // Arsenal vs Man City matches
+        if ((f.home === 'ARS' && f.away === 'MCI') || (f.home === 'MCI' && f.away === 'ARS')) {
+          if (f.home === 'ARS') {
+            // Arsenal home vs Man City away
+            ars.h2hGD += (homeScore - awayScore);
+            mci.h2hGD += (awayScore - homeScore);
+            if (homeScore > awayScore) {
+              ars.h2hPts += 3;
+            } else if (homeScore < awayScore) {
+              mci.h2hPts += 3;
+              mci.h2hAway += awayScore; // Away goals for Man City
+            } else {
+              ars.h2hPts += 1;
+              mci.h2hPts += 1;
+            }
+          } else {
+            // Man City home vs Arsenal away
+            mci.h2hGD += (homeScore - awayScore);
+            ars.h2hGD += (awayScore - homeScore);
+            if (homeScore > awayScore) {
+              mci.h2hPts += 3;
+            } else if (homeScore < awayScore) {
+              ars.h2hPts += 3;
+              ars.h2hAway += awayScore; // Away goals for Arsenal
+            } else {
+              ars.h2hPts += 1;
+              mci.h2hPts += 1;
+            }
+          }
+        }
+      });
+
       st.sort((a, b) => {
+        // 1. Points
         if (b.pts !== a.pts) return b.pts - a.pts;
-        const gd = (b.gf - b.ga) - (a.gf - a.ga);
-        return gd !== 0 ? gd : b.gf - a.gf;
+
+        // 2. Goal Difference
+        const gdA = a.gf - a.ga;
+        const gdB = b.gf - b.ga;
+        if (gdB !== gdA) return gdB - gdA;
+
+        // 3. Goals Scored
+        if (b.gf !== a.gf) return b.gf - a.gf;
+
+        // 4. Head-to-Head (only for Arsenal vs Man City when tied)
+        const isArsVsMci = (a.abbr === 'ARS' && b.abbr === 'MCI') || (a.abbr === 'MCI' && b.abbr === 'ARS');
+        if (isArsVsMci) {
+          const teamA = a.abbr === 'ARS' ? a : b;
+          const teamB = a.abbr === 'ARS' ? b : a;
+          const multiplier = a.abbr === 'ARS' ? 1 : -1;
+
+          // H2H Points
+          if (teamA.h2hPts !== teamB.h2hPts) return (teamA.h2hPts - teamB.h2hPts) * multiplier;
+
+          // H2H Goal Difference
+          if (teamA.h2hGD !== teamB.h2hGD) return (teamA.h2hGD - teamB.h2hGD) * multiplier;
+
+          // H2H Away Goals
+          if (teamA.h2hAway !== teamB.h2hAway) return (teamA.h2hAway - teamB.h2hAway) * multiplier;
+        }
+
+        // 5. Alphabetical order (playoff would be needed in real life)
+        return a.name.localeCompare(b.name);
       });
       return st;
     }
