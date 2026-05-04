@@ -962,23 +962,23 @@
     // ─── DATA ──────────────────────────────────────────────────────────────────
     const BASE_STANDINGS = [
       { name: "Arsenal FC", abbr: "ARS", w: 23, d: 7, l: 5, pts: 76, mp: 35, gf: 67, ga: 26 },
-      { name: "Manchester City", abbr: "MCI", w: 21, d: 7, l: 5, pts: 70, mp: 33, gf: 66, ga: 29 },
-      { name: "Manchester United", abbr: "MUN", w: 17, d: 10, l: 7, pts: 61, mp: 34, gf: 60, ga: 46 },
-      { name: "Liverpool FC", abbr: "LFC", w: 17, d: 7, l: 10, pts: 58, mp: 34, gf: 57, ga: 44 },
-      { name: "Aston Villa", abbr: "AVL", w: 17, d: 7, l: 10, pts: 58, mp: 34, gf: 47, ga: 42 },
+      { name: "Manchester City", abbr: "MCI", w: 21, d: 7, l: 6, pts: 70, mp: 34, gf: 68, ga: 32 },
+      { name: "Manchester United", abbr: "MUN", w: 18, d: 10, l: 7, pts: 64, mp: 35, gf: 63, ga: 48 },
+      { name: "Liverpool FC", abbr: "LFC", w: 17, d: 7, l: 11, pts: 58, mp: 35, gf: 59, ga: 47 },
+      { name: "Aston Villa", abbr: "AVL", w: 17, d: 7, l: 11, pts: 58, mp: 35, gf: 48, ga: 44 },
       { name: "Brentford FC", abbr: "BRE", w: 14, d: 9, l: 12, pts: 51, mp: 35, gf: 52, ga: 46 },
       { name: "Brighton", abbr: "BRI", w: 13, d: 11, l: 11, pts: 50, mp: 35, gf: 49, ga: 42 },
-      { name: "AFC Bournemouth", abbr: "BOU", w: 11, d: 16, l: 7, pts: 49, mp: 34, gf: 52, ga: 52 },
-      { name: "Chelsea FC", abbr: "CFC", w: 13, d: 9, l: 12, pts: 48, mp: 34, gf: 53, ga: 45 },
+      { name: "AFC Bournemouth", abbr: "BOU", w: 12, d: 16, l: 7, pts: 52, mp: 35, gf: 55, ga: 52 },
+      { name: "Everton FC", abbr: "EVE", w: 14, d: 8, l: 13, pts: 50, mp: 35, gf: 44, ga: 42 },
+      { name: "Chelsea FC", abbr: "CFC", w: 13, d: 9, l: 13, pts: 48, mp: 35, gf: 53, ga: 48 },
       { name: "Fulham FC", abbr: "FUL", w: 14, d: 6, l: 15, pts: 48, mp: 35, gf: 44, ga: 49 },
-      { name: "Everton FC", abbr: "EVE", w: 13, d: 8, l: 13, pts: 47, mp: 34, gf: 41, ga: 41 },
       { name: "Sunderland AFC", abbr: "SUN", w: 12, d: 11, l: 12, pts: 47, mp: 35, gf: 37, ga: 46 },
       { name: "Newcastle United", abbr: "NEW", w: 13, d: 6, l: 16, pts: 45, mp: 35, gf: 49, ga: 51 },
-      { name: "Crystal Palace", abbr: "CRY", w: 11, d: 10, l: 12, pts: 43, mp: 33, gf: 36, ga: 39 },
+      { name: "Crystal Palace", abbr: "CRY", w: 11, d: 10, l: 14, pts: 43, mp: 35, gf: 36, ga: 42 },
       { name: "Leeds United", abbr: "LEE", w: 10, d: 13, l: 12, pts: 43, mp: 35, gf: 47, ga: 52 },
-      { name: "Nottm Forest", abbr: "NFO", w: 10, d: 9, l: 15, pts: 39, mp: 34, gf: 41, ga: 45 },
+      { name: "Nottm Forest", abbr: "NFO", w: 11, d: 9, l: 15, pts: 42, mp: 35, gf: 44, ga: 48 },
       { name: "West Ham United", abbr: "WHU", w: 9, d: 9, l: 17, pts: 36, mp: 35, gf: 42, ga: 61 },
-      { name: "Tottenham Hotspur", abbr: "TOT", w: 8, d: 10, l: 16, pts: 34, mp: 34, gf: 43, ga: 53 },
+      { name: "Tottenham Hotspur", abbr: "TOT", w: 9, d: 10, l: 16, pts: 37, mp: 35, gf: 45, ga: 54 },
       { name: "Burnley FC", abbr: "BUR", w: 4, d: 8, l: 23, pts: 20, mp: 35, gf: 35, ga: 71 },
       { name: "Wolverhampton", abbr: "WOL", w: 3, d: 9, l: 23, pts: 18, mp: 35, gf: 25, ga: 63 },
     ];
@@ -990,7 +990,6 @@
     ];
 
     const MCI_FIXTURES = [
-      { id: "eve-mci", date: "May 4", home: "EVE", away: "MCI", homeLabel: "Everton", awayLabel: "Man City", tentative: false, defaultHome: 0, defaultAway: 2 },
       { id: "mci-bre", date: "May 9", home: "MCI", away: "BRE", homeLabel: "Man City", awayLabel: "Brentford", tentative: false, defaultHome: 2, defaultAway: 1 },
       { id: "bou-mci", date: "May 17", home: "BOU", away: "MCI", homeLabel: "Bournemouth", awayLabel: "Man City", tentative: false, defaultHome: 0, defaultAway: 2 },
       { id: "mci-cry", date: "May 22", home: "MCI", away: "CRY", homeLabel: "Man City", awayLabel: "Crystal Palace", tentative: false, defaultHome: 2, defaultAway: 0 },
