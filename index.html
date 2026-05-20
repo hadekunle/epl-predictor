@@ -872,13 +872,38 @@
     </div>
   </header>
 
+  <!-- ══ CHAMPIONS BANNER ══ -->
+  <div
+    style="background: linear-gradient(135deg, var(--ars-red) 0%, #c70107 100%); color: #fff; padding: 16px 24px; text-align: center; border-bottom: 1px solid var(--border); animation: slideDown 0.5s ease-out;">
+    <div style="font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; letter-spacing: 4px; margin-bottom: 4px;">
+      🏆 ARSENAL FC - PREMIER LEAGUE CHAMPIONS 2025/26 🏆
+    </div>
+    <div style="font-family: 'DM Mono', monospace; font-size: 0.75rem; letter-spacing: 2px; opacity: 0.95;">
+      FIRST TITLE IN 22 YEARS
+    </div>
+  </div>
+
+  <style>
+    @keyframes slideDown {
+      from {
+        transform: translateY(-100%);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+  </style>
+
   <!-- ══ ROOT GRID ══ -->
   <div class="root-grid">
 
     <!-- ── STANDINGS HEADER: spans cols 1-2 on desktop ── -->
     <div class="standings-header-cell">
       <h2>Premier League</h2>
-      <p class="instructions">Enter your predictions and share with friends!</p>
+      <p class="instructions">🏆 Arsenal crowned champions! Final day May 24th</p>
     </div>
 
     <!-- ── ARSENAL COLUMN ── -->
@@ -896,7 +921,7 @@
       <div class="team-header">
         <div class="team-crest mci-crest">MCI</div>
         <div class="team-name mci-name">Man City</div>
-        <div class="team-pts mci-pts">77 pts</div>
+        <div class="team-pts mci-pts">78 pts</div>
       </div>
       <div class="fixtures-grid" id="mci-fixtures"></div>
     </div>
@@ -962,22 +987,22 @@
     // ─── DATA ──────────────────────────────────────────────────────────────────
     const BASE_STANDINGS = [
       { name: "Arsenal FC", abbr: "ARS", w: 25, d: 7, l: 5, pts: 82, mp: 37, gf: 69, ga: 26 },
-      { name: "Manchester City", abbr: "MCI", w: 23, d: 8, l: 5, pts: 77, mp: 36, gf: 75, ga: 32 },
+      { name: "Manchester City", abbr: "MCI", w: 23, d: 9, l: 5, pts: 78, mp: 37, gf: 76, ga: 33 },
       { name: "Manchester United", abbr: "MUN", w: 19, d: 11, l: 7, pts: 68, mp: 37, gf: 66, ga: 50 },
       { name: "Aston Villa", abbr: "AVL", w: 18, d: 8, l: 11, pts: 62, mp: 37, gf: 54, ga: 48 },
       { name: "Liverpool FC", abbr: "LFC", w: 17, d: 8, l: 12, pts: 59, mp: 37, gf: 62, ga: 52 },
-      { name: "AFC Bournemouth", abbr: "BOU", w: 13, d: 16, l: 7, pts: 55, mp: 36, gf: 56, ga: 52 },
+      { name: "AFC Bournemouth", abbr: "BOU", w: 13, d: 17, l: 7, pts: 56, mp: 37, gf: 57, ga: 53 },
       { name: "Brighton", abbr: "BRI", w: 14, d: 11, l: 12, pts: 53, mp: 37, gf: 52, ga: 43 },
+      { name: "Chelsea FC", abbr: "CFC", w: 14, d: 10, l: 13, pts: 52, mp: 37, gf: 57, ga: 50 },
       { name: "Brentford FC", abbr: "BRE", w: 14, d: 10, l: 13, pts: 52, mp: 37, gf: 54, ga: 51 },
       { name: "Sunderland AFC", abbr: "SUN", w: 13, d: 12, l: 12, pts: 51, mp: 37, gf: 40, ga: 47 },
-      { name: "Chelsea FC", abbr: "CFC", w: 13, d: 10, l: 13, pts: 49, mp: 36, gf: 55, ga: 49 },
       { name: "Newcastle United", abbr: "NEW", w: 14, d: 7, l: 16, pts: 49, mp: 37, gf: 53, ga: 53 },
       { name: "Everton FC", abbr: "EVE", w: 13, d: 10, l: 14, pts: 49, mp: 37, gf: 47, ga: 49 },
       { name: "Fulham FC", abbr: "FUL", w: 14, d: 7, l: 16, pts: 49, mp: 37, gf: 45, ga: 51 },
       { name: "Leeds United", abbr: "LEE", w: 11, d: 14, l: 12, pts: 47, mp: 37, gf: 49, ga: 53 },
       { name: "Crystal Palace", abbr: "CRY", w: 11, d: 12, l: 14, pts: 45, mp: 37, gf: 40, ga: 49 },
       { name: "Nottm Forest", abbr: "NFO", w: 11, d: 10, l: 16, pts: 43, mp: 37, gf: 47, ga: 50 },
-      { name: "Tottenham Hotspur", abbr: "TOT", w: 9, d: 11, l: 16, pts: 38, mp: 36, gf: 46, ga: 55 },
+      { name: "Tottenham Hotspur", abbr: "TOT", w: 9, d: 11, l: 17, pts: 38, mp: 37, gf: 47, ga: 57 },
       { name: "West Ham United", abbr: "WHU", w: 9, d: 9, l: 19, pts: 36, mp: 37, gf: 43, ga: 65 },
       { name: "Burnley FC", abbr: "BUR", w: 4, d: 9, l: 24, pts: 21, mp: 37, gf: 37, ga: 74 },
       { name: "Wolverhampton", abbr: "WOL", w: 3, d: 10, l: 24, pts: 19, mp: 37, gf: 26, ga: 67 },
@@ -988,7 +1013,6 @@
     ];
 
     const MCI_FIXTURES = [
-      { id: "bou-mci", date: "May 19", home: "BOU", away: "MCI", homeLabel: "Bournemouth", awayLabel: "Man City", tentative: false, defaultHome: 0, defaultAway: 0 },
       { id: "mci-avl", date: "May 24", home: "MCI", away: "AVL", homeLabel: "Man City", awayLabel: "Aston Villa", tentative: false, defaultHome: 0, defaultAway: 0 },
     ];
 
