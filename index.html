@@ -1325,6 +1325,93 @@
 
     init();
   </script>
+
+  <!-- ══ FIREWORKS ANIMATION ══ -->
+  <canvas id="fireworks"
+    style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999;"></canvas>
+  <script>
+    const canvas = document.getElementById('fireworks');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+
+    class Particle {
+      constructor(x, y, color) {
+        this.x = x;
+        this.y = y;
+        this.color = color;
+        this.velocity = {
+          x: (Math.random() - 0.5) * 8,
+          y: (Math.random() - 0.5) * 8
+        };
+        this.alpha = 1;
+        this.decay = Math.random() * 0.015 + 0.015;
+        this.gravity = 0.15;
+        this.size = Math.random() * 3 + 2;
+      }
+
+      update() {
+        this.velocity.y += this.gravity;
+        this.x += this.velocity.x;
+        this.y += this.velocity.y;
+        this.alpha -= this.decay;
+      }
+
+      draw() {
+        ctx.save();
+        ctx.globalAlpha = this.alpha;
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    const particles = [];
+    const colors = ['#EF0107', '#FFD700', '#FFFFFF', '#FF6B6B', '#FFA500'];
+
+    function createFirework() {
+      const x = Math.random() * canvas.width;
+      const y = Math.random() * canvas.height * 0.5;
+      const particleCount = 50;
+
+      for (let i = 0; i < particleCount; i++) {
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        particles.push(new Particle(x, y, color));
+      }
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      particles.forEach((particle, index) => {
+        if (particle.alpha <= 0) {
+          particles.splice(index, 1);
+        } else {
+          particle.update();
+          particle.draw();
+        }
+      });
+
+      requestAnimationFrame(animate);
+    }
+
+    // Launch fireworks periodically
+    setInterval(createFirework, 800);
+
+    // Initial burst
+    for (let i = 0; i < 3; i++) {
+      setTimeout(createFirework, i * 200);
+    }
+
+    animate();
+  </script>
 </body>
 
 </html>
